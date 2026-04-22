@@ -19,8 +19,8 @@ COPY backend/requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# Copy project files
-COPY . .
+# Copy backend files only
+COPY backend ./backend
 
 # Create staticfiles directory
 RUN mkdir -p /app/backend/staticfiles
