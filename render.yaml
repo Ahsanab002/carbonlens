@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: carbonlens-backend
+    env: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: cd backend && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "carbonlens-backend.onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: carbonlens-db
+          property: connectionString
+    
+  - type: postgres
+    name: carbonlens-db
+    plan: free
+    ipAllowList: []
+    postgresMajorVersion: 15

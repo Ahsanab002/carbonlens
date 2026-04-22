@@ -4,7 +4,7 @@ djangorestframework==3.14.0
 djangorestframework-gis==1.0
 
 # PostgreSQL and PostGIS
-# psycopg2-binary==2.9.9
+psycopg2-binary==2.9.9
 
 # CORS headers
 django-cors-headers==4.3.1
@@ -49,3 +49,10 @@ django-debug-toolbar==4.2.0
 
 # API documentation
 drf-yasg==1.21.7
+
+# Production server and static files
+gunicorn==21.2.0
+whitenoise==6.6.0
+dj-database-url==2.1.0
+
+

@@ -5,9 +5,11 @@ Django settings for LiDAR Carbon Analysis project.
 from pathlib import Path
 import os
 
-GDAL_LIBRARY_PATH = r"C:\Users\AL FATAH LAPTOP\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
-GEOS_LIBRARY_PATH = r"C:\Users\AL FATAH LAPTOP\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
-PROJ_LIB = r"C:\Users\AL FATAH LAPTOP\AppData\Local\Programs\OSGeo4W\share\proj"
+# GDAL/GEOS configuration - only set for Windows development
+if os.name == 'nt':  # Windows only
+    GDAL_LIBRARY_PATH = r"C:\Users\AL FATAH LAPTOP\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
+    GEOS_LIBRARY_PATH = r"C:\Users\AL FATAH LAPTOP\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
+    PROJ_LIB = r"C:\Users\AL FATAH LAPTOP\AppData\Local\Programs\OSGeo4W\share\proj"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,7 +20,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-change-this-in
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -44,6 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -75,16 +79,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DB_NAME', 'lidar_carbon_db'),
-        'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', '123'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+if os.environ.get('DATABASE_URL'):
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'), conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': os.environ.get('DB_NAME', 'lidar_carbon_db'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', '123'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -119,7 +129,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://carbonlens.vercel.app",
 ]
+
+# Allow additional origins from environment variable
+if os.environ.get('CORS_ALLOWED_ORIGINS'):
+    CORS_ALLOWED_ORIGINS.extend(os.environ.get('CORS_ALLOWED_ORIGINS', '').split(','))
+
 CORS_ALLOW_CREDENTIALS = True
 
 # REST Framework settings
