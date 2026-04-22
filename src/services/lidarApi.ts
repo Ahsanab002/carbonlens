@@ -5,10 +5,9 @@
 
 // Auto-detect backend URL
 const getBackendUrl = (): string => {
-  // Try localhost:8000 first (production)
-  if (typeof window !== 'undefined') {
-    // Use 8000 as it's the Django dev server default
-    return 'http://localhost:8000';
+  // Use environment variable if available, otherwise fall back to localhost for development
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
   }
   return 'http://localhost:8000';
 };
