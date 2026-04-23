@@ -24,6 +24,5 @@ COPY backend ./backend
 RUN mkdir -p /app/backend/staticfiles
 
 WORKDIR /app/backend
-CMD python manage.py migrate --noinput && \
-    python manage.py collectstatic --noinput --clear && \
-    gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT"]
