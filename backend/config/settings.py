@@ -79,10 +79,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
 # Database
-if os.environ.get('DATABASE_URL'):
-    import dj_database_url
+import dj_database_url
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'), conn_max_age=600)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            engine='django.contrib.gis.db.backends.postgis'
+        )
     }
 else:
     DATABASES = {
@@ -130,6 +137,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://carbonlens.vercel.app",
+    "https://carbonlens-bice.vercel.app",
 ]
 
 # Allow additional origins from environment variable
