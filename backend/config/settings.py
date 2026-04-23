@@ -84,13 +84,12 @@ import dj_database_url
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            engine='django.contrib.gis.db.backends.postgis'
-        )
-    }
+    db_config = dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+    )
+    db_config['ENGINE'] = 'django.db.backends.postgresql'
+    DATABASES = {'default': db_config}
 else:
     DATABASES = {
         'default': {
