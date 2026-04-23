@@ -2,7 +2,9 @@ FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so \
+    GEOS_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgeos_c.so
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -11,6 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     libpq-dev \
     python3-dev \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
