@@ -16,8 +16,8 @@ channels==4.0.0
 
 # LiDAR processing
 laspy==2.5.1
-PDAL==3.2.3
-
+# PDAL==3.2.3
+PDAL
 # Geospatial libraries
 Shapely==2.0.2
 pyproj==3.6.1
