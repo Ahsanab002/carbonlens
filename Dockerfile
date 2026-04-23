@@ -25,9 +25,8 @@ COPY backend ./backend
 # Create staticfiles directory
 RUN mkdir -p /app/backend/staticfiles
 
-# Collect static files
+# Run migrations, collect static files, and start server at runtime
 WORKDIR /app/backend
-RUN python manage.py collectstatic --noinput --clear
-
-# Run migrations and start server
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+CMD python manage.py migrate --noinput && \
+    python manage.py collectstatic --noinput --clear && \
+    gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
