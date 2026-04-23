@@ -16,7 +16,7 @@ channels==4.0.0
 
 # LiDAR processing
 laspy==2.5.1
-pdal>=3.0
+
 
 # Geospatial libraries
 Shapely==2.0.2
