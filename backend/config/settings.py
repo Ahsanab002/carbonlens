@@ -11,19 +11,14 @@ if os.name == 'nt':  # Windows only
     GEOS_LIBRARY_PATH = r"C:\Users\AL FATAH LAPTOP\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
     PROJ_LIB = r"C:\Users\AL FATAH LAPTOP\AppData\Local\Programs\OSGeo4W\share\proj"
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-production')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -32,17 +27,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
-    
-    # Third party apps
     'rest_framework',
     'rest_framework_gis',
     'corsheaders',
     'channels',
-    
-    # Local apps
     'lidar_app.apps.LidarAppConfig',
     'carbon_app.apps.CarbonAppConfig',
-    # 'lidar_app',
 ]
 
 MIDDLEWARE = [
@@ -88,7 +78,7 @@ if DATABASE_URL:
         default=DATABASE_URL,
         conn_max_age=600,
     )
-    db_config['ENGINE'] = 'django.db.backends.postgresql'
+    db_config['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
     DATABASES = {'default': db_config}
 else:
     DATABASES = {
@@ -102,7 +92,6 @@ else:
         }
     }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -110,24 +99,19 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Media files
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -139,13 +123,11 @@ CORS_ALLOWED_ORIGINS = [
     "https://carbonlens-bice.vercel.app",
 ]
 
-# Allow additional origins from environment variable
 if os.environ.get('CORS_ALLOWED_ORIGINS'):
     CORS_ALLOWED_ORIGINS.extend(os.environ.get('CORS_ALLOWED_ORIGINS', '').split(','))
 
 CORS_ALLOW_CREDENTIALS = True
 
-# REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 100,
@@ -158,17 +140,14 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Channels settings
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer'
     }
 }
 
-# LiDAR Processing settings
 LIDAR_UPLOAD_PATH = 'lidar_uploads/'
 LIDAR_PROCESSED_PATH = 'lidar_processed/'
 MAX_UPLOAD_SIZE = 1024 * 1024 * 500  # 500MB
 
-# ML Models path
 ML_MODELS_PATH = BASE_DIR / 'ml_models'
