@@ -1,9 +1,9 @@
-@"
 {
   "build": {
-    "builder": "dockerfile",
-    "dockerfile": "./Dockerfile"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "cd /app/backend && python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT"
   }
 }
-"@ | Set-Content railway.json -Encoding UTF8
-
