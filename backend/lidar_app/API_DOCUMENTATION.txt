@@ -1,0 +1,263 @@
+"""
+LIDAR PROCESSING API DOCUMENTATION
+===================================
+
+This document provides complete information about the LiDAR data processing backend,
+including all endpoints, metrics calculated, dependencies, and configuration.
+
+## INSTALLATION & SETUP
+
+### Dependencies
+All required packages are in requirements.txt:
+- laspy==2.5.1  # LAS/LAZ file reading
+- numpy==1.26.2  # Numerical operations
+- Django==4.2.7  # Web framework
+- djangorestframework==3.14.0  # REST API
+- django-cors-headers==4.3.1  # CORS support
+- django-contrib-gis  # GIS capabilities
+- Shapely==2.0.2  # Geometry operations
+
+Install: pip install -r requirements.txt
+
+### Configuration
+Required settings in settings.py:
+- GDAL_LIBRARY_PATH = path to gdal311.dll
+- GEOS_LIBRARY_PATH = path to geos_c.dll  
+- PROJ_LIB = path to proj data directory
+- LIDAR_UPLOAD_PATH = 'lidar_uploads/'
+- LIDAR_PROCESSED_PATH = 'lidar_processed/'
+- MAX_UPLOAD_SIZE = 1024 * 1024 * 500  # 500MB
+
+### Initialize Database
+python manage.py makemigrations
+python manage.py migrate
+
+### Run Tests
+python manage.py test lidar_app.tests -v 2
+
+## FILE UPLOAD & AUTO-PROCESSING
+
+When a user uploads a LAS/LAZ file:
+1. File is saved to MEDIA_ROOT/lidar_uploads/
+2. LidarDataset record is created with status='uploaded'
+3. Django signal triggers automatic processing
+4. LidarProcessor.extract_features() extracts all metrics
+5. ForestCompartment records created with metrics
+6. Status updated to 'completed' or 'error'
+
+No manual processing needed - automatic on upload!
+
+## API ENDPOINTS
+
+### DATASETS ENDPOINTS
+
+1. List All Datasets
+   GET /api/lidar/datasets/
+   Query params:
+   - search: Filter by name/description
+   - ordering: -upload_date, name, processing_status
+   Response: Paginated list of datasets
+
+2. Upload New Dataset
+   POST /api/lidar/datasets/upload/
+   Content-Type: multipart/form-data
+   Body:
+   {
+       "file": <LAS or LAZ file>,
+       "name": "Dataset Name",
+       "description": "Optional description"
+   }
+   Response: Created dataset object
+
+3. Get Dataset Details
+   GET /api/lidar/datasets/{id}/
+   Response: Full dataset with all metrics
+
+4. Get Processing Status
+   GET /api/lidar/datasets/{id}/status/
+   Response: 
+   {
+       "id": 1,
+       "name": "Dataset Name",
+       "processing_status": "completed",
+       "metrics": {
+           "point_count": 1000000,
+           "min_height": 0.0,
+           "max_height": 45.3,
+           "avg_point_density": 10.5,
+           "extent": "POLYGON(...)"
+       }
+   }
+
+5. Get All Metrics
+   GET /api/lidar/datasets/{id}/metrics/
+   Response:
+   {
+       "dataset": {...},
+       "aggregated_metrics": {
+           "total_compartments": 100,
+           "total_area_hectares": 1000,
+           "avg_canopy_height": 24.5,
+           "max_canopy_height": 45.3,
+           "avg_canopy_cover": 87.3,
+           "avg_foliage_diversity": 2.1
+       }
+   }
+
+6. Get Point Cloud (3D Viewer)
+   GET /api/lidar/datasets/{id}/point-cloud/
+   Returns: 100k downsampled points with x, y, z coordinates
+   Response:
+   {
+       "dataset_id": 1,
+       "dataset_name": "Dataset",
+       "point_count": 100000,
+       "points": {
+           "x": [x1, x2, ...],
+           "y": [y1, y2, ...],
+           "z": [z1, z2, ...],
+           "intensity": [int1, int2, ...],
+           "classification": [class1, class2, ...]
+       }
+   }
+
+7. Get Compartments
+   GET /api/lidar/datasets/{id}/compartments/
+   Response:
+   {
+       "dataset_id": 1,
+       "dataset_name": "Dataset",
+       "compartments": [
+           {
+               "id": 1,
+               "name": "Compartment_0_0",
+               "area_hectares": 10.5,
+               "geometry": {...},
+               "metrics": {...}
+           }
+       ],
+       "total_count": 100
+   }
+
+8. Manually Process Dataset
+   POST /api/lidar/datasets/{id}/process/
+   (Usually auto-processed, but can trigger manually)
+
+9. Delete Dataset
+   DELETE /api/lidar/datasets/{id}/
+
+### COMPARTMENT ENDPOINTS
+
+1. List Compartments
+   GET /api/lidar/compartments/
+   Query params:
+   - dataset={id}: Filter by dataset
+   - ordering: area_hectares, canopy_cover_percent
+
+2. Get Compartment Details
+   GET /api/lidar/compartments/{id}/
+   Response: Compartment with geometry and all metrics
+
+3. Get Compartment Metrics
+   GET /api/lidar/compartments/{id}/metrics/
+   Response:
+   {
+       "id": 1,
+       "name": "Compartment_0_0",
+       "area_hectares": 10.5,
+       "metrics": {
+           "canopy_height_mean": 24.5,
+           "canopy_height_max": 45.3,
+           "canopy_cover_percent": 87.3,
+           "height_percentile_95": 40.2,
+           "height_percentile_75": 30.1,
+           "height_percentile_50": 20.5,
+           "crown_volume": 1234.5,
+           "foliage_height_diversity": 2.1
+       }
+   }
+
+4. Predict Biomass
+   POST /api/lidar/compartments/{id}/predict-biomass/
+
+### BIOMASS ENDPOINTS
+
+1. List Biomass Estimates
+   GET /api/lidar/biomass/
+   Query params:
+   - compartment={id}: Filter by compartment
+
+2. Get Estimate Details
+   GET /api/lidar/biomass/{id}/
+
+## METRICS EXTRACTED
+
+### Dataset-Level Metrics
+- point_count: Total number of points in dataset
+- min_height: Minimum point height (m)
+- max_height: Maximum point height (m)
+- avg_point_density: Average points per m² 
+- extent: Spatial bounding box POLYGON (WGS84)
+
+### Compartment-Level Metrics
+- canopy_height_mean: Average height of all points (m)
+- canopy_height_max: Maximum height in compartment (m)
+- height_percentile_95: 95th percentile height (m)
+- height_percentile_75: 75th percentile height (m)
+- height_percentile_50: Median height (m)
+- canopy_cover_percent: % of points > 2m threshold
+- crown_volume: Estimated volume of tree crowns (m³)
+- foliage_height_diversity: Std deviation of canopy heights
+- area_hectares: Compartment area in hectares
+
+## MANAGEMENT COMMANDS
+
+1. Process Unprocessed Datasets
+   python manage.py process_lidar_datasets
+   Finds and processes all unprocessed or failed datasets
+
+2. Reprocess All Datasets
+   python manage.py process_lidar_datasets --all
+   Reprocesses all datasets, including completed ones
+
+3. Process Specific Dataset
+   python manage.py process_lidar_datasets --dataset-id=5
+   Processes dataset with ID 5
+
+## TESTING
+
+Run all tests:
+python manage.py test lidar_app -v 2
+
+Run specific test:
+python manage.py test lidar_app.tests.test_lidar_processor.LidarProcessorTestCase.test_extract_features -v 2
+
+Run API tests:
+python manage.py test lidar_app.tests.test_api -v 2
+
+## ERROR HANDLING
+
+- Invalid file format: Returns 400 Bad Request
+- Processing errors: Dataset status set to 'error'
+- File not found: Returns FileNotFoundError
+- Database errors: Returns 500 Internal Server Error
+
+Check logs for details:
+tail -f logs/django.log
+
+## PERFORMANCE NOTES
+
+- Max file upload: 500MB (configurable)
+- Large files > 10MB may take 30+ seconds
+- Point cloud export downsamples to 100k points max
+- Grid-based compartmentalization uses 10x10 grid
+
+## FUTURE ENHANCEMENTS
+
+- Async processing with Celery for large files
+- WebSocket progress updates
+- Point cloud filtering (return only vegetation)
+- Custom compartmentalization strategies
+- Advanced biomass models integration
+- Streaming uploads
+"""
