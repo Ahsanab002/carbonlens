@@ -5,7 +5,26 @@ import { motion } from "framer-motion";
 
 const Hero = () => {
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden bg-black">
+      {/* Background Video */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          style={{ animationPlayState: 'running' }}
+          onLoadedMetadata={(e) => { e.currentTarget.playbackRate = 1.25; }}
+        >
+          <source src="/videos/189813-887078786.mp4" type="video/mp4" />
+          <source src="/videos/132793-754897675.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
+      </div>
+
       {/* Background imagery effects: soft tree silhouettes */}
       <svg className="absolute left-0 bottom-0 w-1/3 opacity-10 pointer-events-none" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
         <defs>
@@ -29,87 +48,40 @@ const Hero = () => {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
+          className="max-w-2xl"
         >
-          <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
-              <span className="bg-gradient-primary bg-clip-text text-transparent">CARBON LENS</span>
-              <br />
-              <span className="text-foreground">LiDAR Biomass & Carbon Intelligence</span>
-            </h1>
+          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
+            <span className="bg-gradient-primary bg-clip-text text-transparent">CARBON LENS</span>
+            <br />
+            <span className="text-foreground">LiDAR Biomass & Carbon Intelligence</span>
+          </h1>
 
-            <p className="text-lg text-muted-foreground mb-6">
-              Turn UAV LiDAR into actionable insights — accurate biomass estimation,
-              spatial carbon stock maps, and streamlined credit calculation for
-              sustainable forest management.
-            </p>
+          <p className="text-lg text-muted-foreground mb-6">
+            Turn UAV LiDAR into actionable insights — accurate biomass estimation,
+            spatial carbon stock maps, and streamlined credit calculation for
+            sustainable forest management.
+          </p>
 
-            <div className="flex flex-wrap gap-3">
-              <Link to="/lidar">
-                <Button size="lg" className="bg-gradient-primary border-0">
-                  <Database className="mr-2 h-5 w-5" />
-                  Explore LiDAR
-                </Button>
-              </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link to="/lidar">
+              <Button size="lg" className="bg-gradient-primary border-0">
+                <Database className="mr-2 h-5 w-5" />
+                Explore LiDAR
+              </Button>
+            </Link>
 
-              <Link to="/carbon">
-                <Button size="lg" variant="outline" className="border-primary/30 hover:bg-primary/8">
-                  <Leaf className="mr-2 h-5 w-5" />
-                  View Carbon Maps
-                </Button>
-              </Link>
-            </div>
-
-            <div className="mt-6 text-sm text-muted-foreground">
-              <span className="mr-2">Trusted by researchers, NGOs, and practitioners.</span>
-            </div>
+            <Link to="/carbon">
+              <Button size="lg" variant="outline" className="border-primary/30 hover:bg-primary/8">
+                <Leaf className="mr-2 h-5 w-5" />
+                View Carbon Maps
+              </Button>
+            </Link>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9 }}
-            className="order-first lg:order-last"
-          >
-            <div className="w-full rounded-lg overflow-hidden shadow-sm bg-card/60 border border-border">
-              <div className="p-6">
-                <div className="h-56 rounded-md overflow-hidden relative bg-neutral-900">
-                  {/* Forest image (Unsplash) with subtle overlay and gentle motion */}
-                  <motion.img
-                    src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=80"
-                    alt="Forest canopy"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    initial={{ scale: 1.03 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/6" />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-center text-primary-foreground">
-                      <div className="text-2xl font-semibold">Interactive Preview</div>
-                      <div className="text-sm mt-2 text-muted-foreground">Point clouds, carbon maps, and charts</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-3 gap-3">
-                  <div className="p-3 bg-card rounded text-center">
-                    <div className="text-sm font-bold text-muted-foreground">Point Density</div>
-                    <div className="text-lg font-bold text-foreground">125.4 pts/m²</div>
-                  </div>
-                  <div className="p-3 bg-card rounded text-center">
-                    <div className="text-sm font-bold text-muted-foreground">Carbon Stock</div>
-                    <div className="text-lg font-bold text-foreground">1,523 tC/ha</div>
-                  </div>
-                  <div className="p-3 bg-card rounded text-center">
-                    <div className="text-sm font-bold text-muted-foreground">Sequestration</div>
-                    <div className="text-lg font-bold text-foreground">89.4 tCO₂/yr</div>
-                  </div>
-                </div>
-              </div>
+          <div className="mt-6 text-sm text-muted-foreground">
+            <span className="mr-2">Trusted by researchers, NGOs, and practitioners.</span>
             </div>
           </motion.div>
-        </motion.div>
       </div>
     </section>
   );

@@ -18,7 +18,7 @@ const Navigation = () => {
               <Leaf className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              SYLVIX
+              CARBON LENS
             </span>
           </Link>
 
